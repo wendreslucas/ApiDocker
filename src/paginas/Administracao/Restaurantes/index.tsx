@@ -1,4 +1,5 @@
 import {
+  Button,
   Paper,
   Table,
   TableBody,
@@ -21,6 +22,18 @@ const AdministracaoRestaurantes: React.FC = () => {
     })
   }, [])
 
+  const excluir = (restauranteASerExcluido: IRestaurante) => {
+    axios
+      .delete(`http://localhost:8000/api/v2/restaurantes/${restauranteASerExcluido.id}/`)
+      .then(() => {
+        const listaRestaurante = restaurantes.filter(
+          restaurante => restaurante.id !== restauranteASerExcluido.id
+        )
+        setRestaurantes([...listaRestaurante])
+        alert(`${restauranteASerExcluido.nome} excluído com sucesso`)
+      })
+  }
+
   return (
     <TableContainer component={Paper}>
       <Table>
@@ -28,6 +41,7 @@ const AdministracaoRestaurantes: React.FC = () => {
           <TableRow>
             <TableCell>Nome</TableCell>
             <TableCell>Editar</TableCell>
+            <TableCell>Excluir</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -36,6 +50,11 @@ const AdministracaoRestaurantes: React.FC = () => {
               <TableCell>{restaurante.nome}</TableCell>
               <TableCell>
                 [ <Link to={`/admin/restaurantes/${restaurante.id}`}> Editar </Link> ]
+              </TableCell>
+              <TableCell>
+                <Button variant="outlined" color="error" onClick={() => excluir(restaurante)}>
+                  Excluir
+                </Button>
               </TableCell>
             </TableRow>
           ))}
