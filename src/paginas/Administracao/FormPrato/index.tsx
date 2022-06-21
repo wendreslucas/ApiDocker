@@ -3,44 +3,50 @@ import {
   Box,
   Button,
   Container,
+  FormControl,
+  InputLabel,
   Link,
+  MenuItem,
   Paper,
+  Select,
   TextField,
   Toolbar,
   Typography
 } from '@mui/material'
 
 import React, { useEffect, useState } from 'react'
-import { Link as RouterLink } from 'react-router-dom'
 import { useParams } from 'react-router-dom'
-import IPrato from '../../../interfaces/IPrato'
+import IRestaurante from '../../../interfaces/IRestaurante'
+import ITag from '../../../interfaces/ITag'
 import api from '../../../services/api'
 
 const FormPrato: React.FC = () => {
   const parametros = useParams()
   const [prato, setPrato] = useState('')
+  const [descricao, setDescricao] = useState('')
+
+  const [tag, setTag] = useState('')
+  const [restaurante, setRestaurante] = useState('')
+
+  const [tags, setTags] = useState<ITag[]>([])
+  const [restaurantes, setRestaurantes] = useState<IRestaurante[]>([])
+  const [imagem, setImagem] = useState<File | null>(null)
 
   useEffect(() => {
-    if (parametros.id) {
-      api.get<IPrato>(`/pratos/${parametros.id}/`).then(response => setPrato(response.data.nome))
-    }
-  }, [parametros])
+    api.get<{ tags: ITag[] }>('tags/').then(response => setTags(response.data.tags))
+
+    api.get<IRestaurante[]>('restaurantes/').then(response => setRestaurantes(response.data))
+  }, [])
 
   const salvarNovoPrato = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+  }
 
-    if (parametros.id) {
-      api.put(`/pratos/${parametros.id}/`, { nome: prato }).then(() => {
-        alert('Prato atualizado com sucesso')
-      })
+  const adicionarImagem = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files?.length) {
+      setImagem(e.target.files[0])
     } else {
-      api
-        .post('/pratos/', {
-          nome: prato
-        })
-        .then(() => {
-          alert('prato cadastrado com sucesso!')
-        })
+      setImagem(null)
     }
   }
 
@@ -56,11 +62,51 @@ const FormPrato: React.FC = () => {
               <TextField
                 fullWidth
                 label="Novo Prato"
+                margin="dense"
                 onChange={e => setPrato(e.target.value)}
                 required
                 value={prato}
                 variant="standard"
               />
+
+              <TextField
+                fullWidth
+                label="Descrição"
+                margin="dense"
+                onChange={e => setDescricao(e.target.value)}
+                required
+                value={descricao}
+                variant="standard"
+              />
+
+              <FormControl margin="dense" fullWidth>
+                <InputLabel id="select-tag">TAG</InputLabel>
+                <Select labelId="select-tag" value={tag} onChange={e => setTag(e.target.value)}>
+                  {tags.map(tag => (
+                    <MenuItem key={tag.id} value={tag.id}>
+                      {tag.value}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <FormControl margin="dense" fullWidth>
+                <InputLabel id="select-restaurante">RESTAURANTES</InputLabel>
+                <Select
+                  labelId="select-restaurante"
+                  value={restaurante}
+                  onChange={e => setRestaurante(e.target.value)}
+                >
+                  {restaurantes.map(restaurante => (
+                    <MenuItem key={restaurante.id} value={restaurante.id}>
+                      {restaurante.nome}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <input type="file" onChange={adicionarImagem} />
+
               <Button fullWidth sx={{ marginTop: 1 }} type="submit" variant="outlined">
                 Salvar
               </Button>
