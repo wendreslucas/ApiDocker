@@ -11,61 +11,104 @@ import {
   Select,
   TextField,
   Toolbar,
-  Typography
-} from '@mui/material'
+  Typography,
+} from '@mui/material';
 
-import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
-import IRestaurante from '../../../interfaces/IRestaurante'
-import ITag from '../../../interfaces/ITag'
-import api from '../../../services/api'
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import IRestaurante from '../../../interfaces/IRestaurante';
+import ITag from '../../../interfaces/ITag';
+import api from '../../../services/api';
 
 const FormPrato: React.FC = () => {
-  const parametros = useParams()
-  const [prato, setPrato] = useState('')
-  const [descricao, setDescricao] = useState('')
+  const parametros = useParams();
+  const [nomePrato, setNomePrato] = useState('');
+  const [descricao, setDescricao] = useState('');
 
-  const [tag, setTag] = useState('')
-  const [restaurante, setRestaurante] = useState('')
+  const [tag, setTag] = useState('');
+  const [restaurante, setRestaurante] = useState('');
 
-  const [tags, setTags] = useState<ITag[]>([])
-  const [restaurantes, setRestaurantes] = useState<IRestaurante[]>([])
-  const [imagem, setImagem] = useState<File | null>(null)
+  const [tags, setTags] = useState<ITag[]>([]);
+  const [restaurantes, setRestaurantes] = useState<IRestaurante[]>([]);
+  const [imagem, setImagem] = useState<File | null>(null);
 
   useEffect(() => {
-    api.get<{ tags: ITag[] }>('tags/').then(response => setTags(response.data.tags))
+    api
+      .get<{ tags: ITag[] }>('tags/')
+      .then((response) => setTags(response.data.tags));
 
-    api.get<IRestaurante[]>('restaurantes/').then(response => setRestaurantes(response.data))
-  }, [])
+    api
+      .get<IRestaurante[]>('restaurantes/')
+      .then((response) => setRestaurantes(response.data));
+  }, []);
 
   const salvarNovoPrato = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-  }
+    e.preventDefault();
+
+    const formData = new FormData();
+
+    formData.append('nome', nomePrato);
+    formData.append('descricao', descricao);
+    formData.append('tag', tag);
+    formData.append('restaurante', restaurante);
+
+    if (imagem) {
+      formData.append('imagem', imagem);
+    }
+
+    api
+      .request({
+        url: 'pratos/',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        data: formData,
+      })
+      .then(() => {
+        setNomePrato('');
+        setDescricao('');
+        setTag('');
+        setRestaurante('');
+        alert('Prato adicionado com sucesso!');
+      })
+      .catch((erro) => console.log(erro));
+  };
 
   const adicionarImagem = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.length) {
-      setImagem(e.target.files[0])
+      setImagem(e.target.files[0]);
     } else {
-      setImagem(null)
+      setImagem(null);
     }
-  }
+  };
 
   return (
     <Box>
       <Container maxWidth="lg" sx={{ mt: 1 }}>
         <Paper sx={{ p: 2 }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}
+          >
             <Typography component="h1" variant="h6">
               Formulário de Pratos
             </Typography>
-            <Box component="form" onSubmit={salvarNovoPrato} sx={{ width: '50%' }}>
+            <Box
+              component="form"
+              onSubmit={salvarNovoPrato}
+              sx={{ width: '50%' }}
+            >
               <TextField
                 fullWidth
                 label="Novo Prato"
                 margin="dense"
-                onChange={e => setPrato(e.target.value)}
+                onChange={(e) => setNomePrato(e.target.value)}
                 required
-                value={prato}
+                value={nomePrato}
                 variant="standard"
               />
 
@@ -73,7 +116,7 @@ const FormPrato: React.FC = () => {
                 fullWidth
                 label="Descrição"
                 margin="dense"
-                onChange={e => setDescricao(e.target.value)}
+                onChange={(e) => setDescricao(e.target.value)}
                 required
                 value={descricao}
                 variant="standard"
@@ -81,9 +124,13 @@ const FormPrato: React.FC = () => {
 
               <FormControl margin="dense" fullWidth>
                 <InputLabel id="select-tag">TAG</InputLabel>
-                <Select labelId="select-tag" value={tag} onChange={e => setTag(e.target.value)}>
-                  {tags.map(tag => (
-                    <MenuItem key={tag.id} value={tag.id}>
+                <Select
+                  labelId="select-tag"
+                  value={tag}
+                  onChange={(e) => setTag(e.target.value)}
+                >
+                  {tags.map((tag) => (
+                    <MenuItem key={tag.id} value={tag.value}>
                       {tag.value}
                     </MenuItem>
                   ))}
@@ -95,9 +142,9 @@ const FormPrato: React.FC = () => {
                 <Select
                   labelId="select-restaurante"
                   value={restaurante}
-                  onChange={e => setRestaurante(e.target.value)}
+                  onChange={(e) => setRestaurante(e.target.value)}
                 >
-                  {restaurantes.map(restaurante => (
+                  {restaurantes.map((restaurante) => (
                     <MenuItem key={restaurante.id} value={restaurante.id}>
                       {restaurante.nome}
                     </MenuItem>
@@ -107,7 +154,12 @@ const FormPrato: React.FC = () => {
 
               <input type="file" onChange={adicionarImagem} />
 
-              <Button fullWidth sx={{ marginTop: 1 }} type="submit" variant="outlined">
+              <Button
+                fullWidth
+                sx={{ marginTop: 1 }}
+                type="submit"
+                variant="outlined"
+              >
                 Salvar
               </Button>
             </Box>
@@ -115,7 +167,7 @@ const FormPrato: React.FC = () => {
         </Paper>
       </Container>
     </Box>
-  )
-}
+  );
+};
 
-export default FormPrato
+export default FormPrato;

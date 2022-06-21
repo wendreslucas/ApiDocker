@@ -1,12 +1,12 @@
-import React from 'react'
-import { Routes, Route } from 'react-router-dom'
-import Home from './paginas/Home'
-import VitrineRestaurantes from './paginas/VitrineRestaurantes'
-import AdministracaoRestaurantes from './paginas/Administracao/AdmRestaurantes'
-import NovoRestaurante from './paginas/Administracao/FormRestaurante'
-import LayoutAdm from './paginas/Administracao/LayoutAdm'
-import AdministracaoPratos from './paginas/Administracao/AdmPratos'
-import FormPrato from './paginas/Administracao/FormPrato'
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import Home from './paginas/Home';
+import VitrineRestaurantes from './paginas/VitrineRestaurantes';
+import AdministracaoRestaurantes from './paginas/Administracao/AdmRestaurantes';
+import NovoRestaurante from './paginas/Administracao/FormRestaurante';
+import LayoutAdm from './paginas/Administracao/LayoutAdm';
+import AdministracaoPratos from './paginas/Administracao/AdmPratos';
+import FormPrato from './paginas/Administracao/FormPrato';
 
 function App() {
   return (
@@ -21,9 +21,10 @@ function App() {
 
         <Route path="pratos" element={<AdministracaoPratos />} />
         <Route path="pratos/novo" element={<FormPrato />} />
+        <Route path="pratos/:id" element={<FormPrato />} />
       </Route>
     </Routes>
-  )
+  );
 }
 
-export default App
+export default App;
